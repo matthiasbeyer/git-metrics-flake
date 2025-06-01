@@ -1,29 +1,55 @@
-{ mkMetric, ... }:
-
 {
+  mkMetric,
   pkgs,
+  gitMinimal,
   git-metrics,
-  metrics ? [ ],
-  doCheck ? false,
   ...
 }:
 
+attrs@{
+  drv,
+  pkgs,
+  git-metrics,
+  metrics ? [ ],
+  doPull ? false,
+  doCheck ? false,
+  doPush ? false,
+  ...
+}:
+
+let
+  toLines = list: pkgs.lib.strings.concatStringsSep "\n" list;
+  execMetric =
+    m:
+    pkgs.lib.getExe (m {
+      inherit drv;
+    });
+in
 pkgs.writeShellApplication {
   name = "metric-ci-script";
 
+  runtimeInputs = [
+    gitMinimal
+    git-metrics
+  ];
+
   text =
     let
-      git-metrics = pkgs.lib.getExe git-metrics;
+      git-metrics = pkgs.lib.getExe attrs.git-metrics;
     in
     ''
-      ${git-metrics} pull
+      ${pkgs.lib.optionalString doPull ''
+        ${git-metrics} pull
+      ''}
 
-      ${pkgs.strings.concatStringsSep "\n" (builtins.map (metric: "${metric}") metrics)}
+      ${toLines (builtins.map execMetric metrics)}
 
       ${pkgs.lib.optionalString doCheck ''
         ${git-metrics} check
       ''}
 
-      ${git-metrics} push
+      ${pkgs.lib.optionalString doPush ''
+        ${git-metrics} push
+      ''}
     '';
 }

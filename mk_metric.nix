@@ -1,7 +1,12 @@
-{ pkgs, git-metrics, ... }:
+{
+  pkgs,
+  git-metrics,
+  gitMinimal,
+  ...
+}:
 
 {
-  metricName,
+  name,
   generator,
   ...
 }:
@@ -16,12 +21,14 @@ let
   ) "" metric.tags;
 in
 pkgs.writeShellApplication {
-  name = "git-metric-${metricName}";
+  name = "git-metric-${name}";
+
+  runtimeInputs = [
+    gitMinimal
+    git-metrics
+  ];
 
   text = ''
-    ${pkgs.lib.getExe git-metrics} \
-      add ${metricName} \
-      ${tag_flags} \
-      $(${generator})
+    git metrics add ${name} ${tag_flags} "$(${pkgs.lib.getExe metric.script})"
   '';
 }

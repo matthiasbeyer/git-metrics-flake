@@ -13,8 +13,8 @@ permissions:
 
 env:
   CARGO_TERM_COLOR: always
-
 jobs:
+
   check:
     name: check
     runs-on: ubuntu-latest
@@ -42,6 +42,7 @@ jobs:
       - run: |
           git config --global user.name 'Github Action'
           git config --global user.email 'nobody@example.com'
+          nix run .#git-metrics -- pull
           nix run .#ci-script
 
   dogfood-master:
@@ -62,6 +63,7 @@ jobs:
           git config --global user.name 'Github Action'
           git config --global user.email 'nobody@example.com'
           git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/$GITHUB_REPOSITORY
+          nix run .#git-metrics -- pull
           nix run .#ci-script
           nix run .#git-metrics -- push
 

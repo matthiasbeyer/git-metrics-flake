@@ -4,18 +4,16 @@
 let
   metric = {
     script = pkgs.writeShellApplication {
-      name = "binary_size";
+      name = "flake_last_modified";
 
       runtimeInputs = [
-        pkgs.coreutils
-        pkgs.gnused
+        pkgs.nix
       ];
 
       text = ''
-        du --bytes --dereference-args ${pkgs.lib.getExe drv} | sed -E 's/([0-9]+).*/\1/'
+        nix flake metadata --json | jq '.lastModified'
       '';
     };
-
     tags = { };
   };
 in

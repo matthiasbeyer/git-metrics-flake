@@ -17,6 +17,17 @@
       let
         pkgs = import inputs.nixpkgs { inherit system; };
 
+        callPackage = pkgs.lib.callPackageWith (
+          pkgs
+          // inputs.self.packages."${system}"
+          // {
+            inherit callPackage;
+
+            # Inherit our "lib" with a more readable name for importing it into the VMtests
+            gitMetricsLib = inputs.self.lib."${system}";
+          }
+        );
+
         src = ./.;
 
         formatting =
@@ -45,26 +56,47 @@
             check = treefmtEval.config.build.check src;
           };
 
+        tests = callPackage ./tests { };
       in
       {
         inherit (formatting) formatter;
         checks = {
           inherit (formatting) check;
+          inherit (tests) simple generate-metric-binary-size;
         };
 
         lib = rec {
-          mkMetric = import ./mk_metric.nix { };
+          mkMetric = callPackage ./mk_metric.nix { };
 
-          mkCiScript = import ./mk_metric_ci_script.nix {
+          mkCiScript = callPackage ./mk_metric_ci_script.nix {
             inherit mkMetric;
           };
 
-          metrics = import ./metrics {
+          metrics = callPackage ./metrics {
             inherit mkMetric;
           };
         };
 
-        packages.git-metrics = pkgs.callPackage ./git-metrics.nix { };
+        packages =
+          let
+            mkCiScript = inputs.self.lib."${system}".mkCiScript;
+            ms = inputs.self.lib."${system}".metrics;
+          in
+          {
+            git-metrics = pkgs.callPackage ./git-metrics.nix { };
+
+            # For won CI, do not use
+            ci-script = mkCiScript {
+              inherit pkgs;
+              inherit (inputs.self.packages."${system}") git-metrics;
+              drv = inputs.self.packages."${system}".git-metrics;
+
+              metrics = [
+                ms.binary_size
+              ];
+            };
+          };
+
       }
     );
 }

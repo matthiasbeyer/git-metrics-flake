@@ -1,13 +1,10 @@
 # # For every metric you want to monitor, you need to add an entry
-# [metrics.metric_name.unit]
-# # This scale can be "si" for International System of Units or "binary" (optional)
-# scale = "si"
-# # Any string that will be added as a suffix (optional)
+[metrics.binary_size.unit]
+scale = "binary"
 # suffix = "B"
-# # Number of decimals for every number (optional)
 # decimals = 3
-#
-# # Set of rules for the unit budget.
+
+# Set of rules for the unit budget.
 # [[metrics.metric_name.rules]]
 # type = "max"
 # value = 12.34

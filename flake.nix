@@ -93,7 +93,6 @@
 
               metrics = [
                 ms.binary_size
-                ms.flake_last_modified
               ];
             };
           };

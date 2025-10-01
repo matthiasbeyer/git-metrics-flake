@@ -1,0 +1,37 @@
+# # For every metric you want to monitor, you need to add an entry
+# [metrics.metric_name.unit]
+# # This scale can be "si" for International System of Units or "binary" (optional)
+# scale = "si"
+# # Any string that will be added as a suffix (optional)
+# suffix = "B"
+# # Number of decimals for every number (optional)
+# decimals = 3
+#
+# # Set of rules for the unit budget.
+# [[metrics.metric_name.rules]]
+# type = "max"
+# value = 12.34
+#
+# [[metrics.metric_name.rules]]
+# type = "min"
+# value = 1.234
+#
+# [[metrics.metric_name.rules]]
+# type = "max-decrease"
+# # the metric cannot decrease of more than 5%
+# ratio = 0.05
+#
+# [[metrics.metric_name.rules]]
+# type = "max-decrease"
+# # the metric cannot decrease of more than 1.234
+# value = 1.234
+#
+# [[metrics.metric_name.rules]]
+# type = "max-increase"
+# # the metric cannot increase of more than 5%
+# ratio = 0.05
+#
+# [[metrics.metric_name.rules]]
+# type = "max-increase"
+# # the metric cannot increase of more than 1.234
+# value = 1.234

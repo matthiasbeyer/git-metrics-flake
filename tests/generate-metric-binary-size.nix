@@ -19,6 +19,10 @@ let
         du --bytes --dereference-args ${pkgs.lib.getExe git-metrics} | sed -E 's/([0-9]+).*/\1/'
       '';
     };
+
+    tags = {
+      "testkey" = "testvalue";
+    };
   };
 
   run-test = pkgs.writeShellApplication {

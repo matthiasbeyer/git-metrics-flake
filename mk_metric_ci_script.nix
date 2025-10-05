@@ -11,8 +11,10 @@ attrs@{
   git-metrics,
   metrics ? [ ],
   doPull ? false,
+  pullRemote ? null,
   doCheck ? false,
   doPush ? false,
+  pushRemote ? null,
   ...
 }:
 
@@ -33,7 +35,7 @@ pkgs.writeShellApplication {
     in
     ''
       ${pkgs.lib.optionalString doPull ''
-        ${git-metrics} pull
+        ${git-metrics} pull ${toString pullRemote}
       ''}
 
       ${toLines (builtins.map pkgs.lib.getExe metrics)}
@@ -43,7 +45,7 @@ pkgs.writeShellApplication {
       ''}
 
       ${pkgs.lib.optionalString doPush ''
-        ${git-metrics} push
+        ${git-metrics} push ${toString pushRemote}
       ''}
     '';
 }

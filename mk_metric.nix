@@ -8,12 +8,12 @@
 {
   name,
   script,
-  tags ? [ ],
+  tags ? { },
   ...
 }:
 
 let
-  tag_flags = pkgs.lib.foldl (
+  tag_flags = pkgs.lib.attrsets.foldlAttrs (
     acc: key: value:
     "${acc} --tag \"${key}: ${value}\""
   ) "" tags;

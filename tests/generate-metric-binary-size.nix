@@ -7,25 +7,31 @@
 }:
 
 let
-  # the git-metrics-flake is for running from within nix against some output derivation
-  # So we need a "project" that we run git-metrics for. For that we use git-metrics itself ;-)
-  projectDrv = git-metrics;
-
-  git-metrics-binary-size = gitMetricsLib.metrics.binary_size { drv = projectDrv; };
+  git-metrics-binary-size = gitMetricsLib.mkMetric {
+    name = "binary-size";
+    script = pkgs.writeShellApplication {
+      name = "get-binary-size";
+      runtimeInputs = [
+        pkgs.gnused
+        pkgs.coreutils
+      ];
+      text = ''
+        du --bytes --dereference-args ${pkgs.lib.getExe git-metrics} | sed -E 's/([0-9]+).*/\1/'
+      '';
+    };
+  };
 
   run-test = pkgs.writeShellApplication {
     name = "run-test";
     runtimeInputs = [
       pkgs.gitMinimal
       git-metrics
-
-      git-metrics-binary-size
     ];
 
     text = ''
       cd repo
       echo "Calling git-metric-binary-size" | systemd-cat -p info
-      git-metric-binary-size
+      ${pkgs.lib.getExe git-metrics-binary-size}
       echo "Calling git-metric-binary-size finished" | systemd-cat -p info
 
       git-metrics show | grep -q binary-size

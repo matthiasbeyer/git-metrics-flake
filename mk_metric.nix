@@ -7,18 +7,16 @@
 
 {
   name,
-  generator,
+  script,
+  tags ? [ ],
   ...
 }:
 
-{ drv }:
-
 let
-  metric = generator { inherit drv; };
-  tag_flags = pkgs.lib.attrsets.foldlAttrs (
+  tag_flags = pkgs.lib.foldl (
     acc: key: value:
     "${acc} --tag \"${key}: ${value}\""
-  ) "" metric.tags;
+  ) "" tags;
 in
 pkgs.writeShellApplication {
   name = "git-metric-${name}";
@@ -29,6 +27,6 @@ pkgs.writeShellApplication {
   ];
 
   text = ''
-    git metrics add ${name} ${tag_flags} "$(${pkgs.lib.getExe metric.script})"
+    git metrics add ${name} ${tag_flags} "$(${pkgs.lib.getExe script})"
   '';
 }

@@ -7,23 +7,19 @@
 }:
 
 attrs@{
-  drv,
   pkgs,
   git-metrics,
   metrics ? [ ],
   doPull ? false,
+  pullRemote ? null,
   doCheck ? false,
   doPush ? false,
+  pushRemote ? null,
   ...
 }:
 
 let
   toLines = list: pkgs.lib.strings.concatStringsSep "\n" list;
-  execMetric =
-    m:
-    pkgs.lib.getExe (m {
-      inherit drv;
-    });
 in
 pkgs.writeShellApplication {
   name = "metric-ci-script";
@@ -39,17 +35,17 @@ pkgs.writeShellApplication {
     in
     ''
       ${pkgs.lib.optionalString doPull ''
-        ${git-metrics} pull
+        ${git-metrics} pull ${toString pullRemote}
       ''}
 
-      ${toLines (builtins.map execMetric metrics)}
+      ${toLines (builtins.map pkgs.lib.getExe metrics)}
 
       ${pkgs.lib.optionalString doCheck ''
         ${git-metrics} check
       ''}
 
       ${pkgs.lib.optionalString doPush ''
-        ${git-metrics} push
+        ${git-metrics} push ${toString pushRemote}
       ''}
     '';
 }

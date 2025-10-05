@@ -71,16 +71,12 @@
           mkCiScript = callPackage ./mk_metric_ci_script.nix {
             inherit mkMetric;
           };
-
-          metrics = callPackage ./metrics {
-            inherit mkMetric;
-          };
         };
 
         packages =
           let
             mkCiScript = inputs.self.lib."${system}".mkCiScript;
-            ms = inputs.self.lib."${system}".metrics;
+            mkMetric = inputs.self.lib."${system}".mkMetric;
           in
           {
             git-metrics = pkgs.callPackage ./git-metrics.nix { };
@@ -89,10 +85,23 @@
             ci-script = mkCiScript {
               inherit pkgs;
               inherit (inputs.self.packages."${system}") git-metrics;
-              drv = inputs.self.packages."${system}".git-metrics;
 
               metrics = [
-                ms.binary_size
+                (mkMetric {
+                  name = "binary_size";
+                  script = pkgs.writeShellApplication {
+                    name = "git-metrics-binary-size";
+                    runtimeInputs = [
+                      pkgs.gnused
+                      pkgs.coreutils
+                    ];
+                    text = ''
+                      du --bytes --dereference-args ${
+                        pkgs.lib.getExe inputs.self.packages."${system}".git-metrics
+                      } | sed -E 's/([0-9]+).*/\1/'
+                    '';
+                  };
+                })
               ];
             };
           };

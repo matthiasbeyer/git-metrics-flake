@@ -1,0 +1,5 @@
+[[metrics]]
+name = "binary_size"
+value = 4911112.0
+
+[metrics.tags]
